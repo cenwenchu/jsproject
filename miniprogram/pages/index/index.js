@@ -47,6 +47,7 @@ Page({
   },
 
   onGetOpenid: function() {
+    
     // 调用云函数
     wx.cloud.callFunction({
       name: 'login',
@@ -65,6 +66,92 @@ Page({
         })
       }
     })
+  },
+
+  //create db record
+  doCreateUserInfo: function()
+  {
+    var latitide = 0;
+
+    wx.cloud.callFunction(
+      {
+        name: 'compute',
+        data:
+        {
+          a : 2,
+          b : 3, 
+        },
+
+        success:function(res)
+        {
+          latitide = res.result.sum;
+          console.log('-----');
+          console.log(latitide);
+          console.log('-----');
+        },
+        fail: console.error
+      }
+    )
+
+    const testDB = wx.cloud.database({
+      env:'ziyi-test-1979'
+    })
+    const users = testDB.collection('users')
+
+    users.where({
+      _openid:'oO_6Z5dCTIcIHdH897F6Ji8WYJGU',
+      age:39
+    }).get
+    ({
+      success:function(res)
+      {
+        console.log(res.data);
+      },
+
+      fail:function(res)
+      {
+        console.log(res);
+      }
+    })
+
+    users.add(
+      {
+        data:
+        {
+          name: 'cenwenchu',
+          age :39,
+          birthday: new Date("1979-01-28"),
+          sports:[
+            "basketball",
+            "football",
+            "running"
+          ],
+            location: new testDB.Geo.Point(113, latitide),
+            logtime: testDB.serverDate()
+        },
+
+        success:function(res)
+        {
+          console.log(res);
+          wx.showToast({
+           title: '新增记录成功',
+         })
+         console.log('[数据库] [新增记录] 成功，记录 _id: ', res._id)
+        },
+
+        fail:function(res)
+        {
+          wx.showToast({
+           icon: 'none',
+           title: '新增记录失败'
+         })
+         console.error('[数据库] [新增记录] 失败：', res)
+        }
+
+
+      }
+    )
+
   },
 
   // 上传图片
